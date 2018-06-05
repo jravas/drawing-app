@@ -8,22 +8,19 @@ import * as paper from 'paper';
 })
 export class AppComponent {
   tool = new paper.Tool();
+  color = '#000';
   drawingArea;
   myPath;
 
   onFileChanged(event) {
-    const file = event.target.files[0]
-    // console.log(event.target.results)
+    // get 2d context of canvas elemet
     let ctx = this.drawingArea.getContext('2d');
-    // console.log(ctx)
-    // ctx.drawImage(event.target.files[0], 0, 0);
     let reader = new FileReader();
+    // when image is loaded draw it on canvas element
     reader.onload = function(e) {
-      // console.log(reader.result);
       let image = new Image();
       image.src = reader.result;
       image.onload = function (){
-        // ctx.drawImage(image, 0, 0);
         let raster = new paper.Raster(image);
         raster.position = paper.view.center;
       }
@@ -31,39 +28,37 @@ export class AppComponent {
     reader.readAsDataURL(event.target.files[0]);
   }
   selectTool(tool) {
+    let that = this;
     switch(tool) {
       case 'freeHand':
         this.tool.onMouseDown = function(event) {
           this.myPath = new paper.Path();
-          this.myPath.strokeColor = 'black';
+          this.myPath.strokeColor = that.color;
           this.myPath.add(event.point);
         }
         this.tool.onMouseDrag = function(event) {
           this.myPath.add(event.point);
-          console.log(this.myPath)
         }
         break;
       case 'circle':
-      let circle;
-        this.tool.onMouseDown = function(event) {
-          circle = new paper.Path.Circle({
-            center: event.point,
-            // radius: event.delta.length / 2
-            radius: 1
-          });
-          circle.strokeColor = 'black';
-        }
+        // create circle from center (clicked point) of radius (released point)
         this.tool.onMouseDrag = function(event) {
-          // console.log(event.point)
-          // circle.bounds = new paper.Path.Circle(circle.data.center, event.point)
-          // distance between circle center and pointer location
-          // console.log(event.point.getDistance(circle.bounds.center))
-          circle.scale((event.point.getDistance(circle.bounds.center)) / (circle.bounds.width / 2))
+          var path = new paper.Path.Circle({
+            center: event.downPoint,
+            radius: event.downPoint.getDistance(event.point),
+            strokeColor: that.color
+          });
+          // Remove this path on the next drag event:
+          path.removeOnDrag();
         }
-        this.tool.onMouseUp = function(event) {
-          console.log(circle.bounds.width / 2)
-          // console.log(event.point.getDistance(circle.bounds.center))
-          // circle.bounds = new paper.Path.Circle({circle.center})
+        break;
+      case 'rectangle':
+        // create rectangle from clicked point to released point
+        this.tool.onMouseDrag = function(event) {
+          var rectangle = new paper.Path.Rectangle(event.downPoint, event.point)
+          rectangle.strokeColor = that.color;
+          // Remove this path on the next drag event:
+          rectangle.removeOnDrag();
         }
         break;
     }
