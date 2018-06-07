@@ -18,6 +18,7 @@ html, body {
       display: flex;
       flex-direction: column;
       width: 100%;
+      height: 100%;
       li {
         display: flex;
         justify-content: center;
@@ -37,6 +38,16 @@ html, body {
           a {
             color: #fff;
           }
+        }
+        // only if we stay with this design
+        &:last-child {
+          margin-top: auto;
+        }
+      }
+      .active {
+        background-color: #00b3ff;
+        a {
+          color: #fff;
         }
       }
     }

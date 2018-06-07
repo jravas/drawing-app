@@ -1,27 +1,37 @@
 <ul>
-  <li (click)="selectTool('move')">
+  <li (click)="selectTool('move')" [class.active]="move">
     <a href="#">
       <img src="../../assets/move-tool.svg" alt="Move Tool">
     </a>
   </li>
-  <li (click)="selectTool('freeHand')">
+  <li (click)="selectTool('freeHand')" [class.active]="freeHand">
     <a href="#">
       <img src="../../assets/free-hand.svg" alt="Free Hand Tool">
     </a>
   </li>
-  <li (click)="selectTool('circle')">
+  <li (click)="selectTool('circle')" [class.active]="circle">
     <a href="#">
       <img src="../../assets/circle-tool.svg" alt="Circle Tool">
     </a>
   </li>
-  <li (click)="selectTool('rectangle')">
+  <li (click)="selectTool('rectangle')" [class.active]="rectangle">
     <a href="#">
       <img src="../../assets/rectangle-tool.svg" alt="Rectangle Tool">
     </a>
   </li>
-  <li (click)="selectTool('bezier')">
+  <li (click)="selectTool('bezier')" [class.active]="bezier">
     <a href="#">
       <img src="../../assets/bezier-tool.svg" alt="Bezier Tool">
+    </a>
+  </li>
+  <li (click)="selectTool('close')" [class.active]="close">
+    <a href="#">
+      close
+    </a>
+  </li>
+  <li (click)="selectTool('simplify')" [class.active]="simplify">
+    <a href="#">
+      simplify
     </a>
   </li>
   <li (click)="clearScene()">

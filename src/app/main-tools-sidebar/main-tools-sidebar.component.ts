@@ -14,6 +14,14 @@ export class MainToolsSidebarComponent implements OnInit {
   segment;
   path;
   pathB;
+  // tools calsses
+  freeHand;
+  circle;
+  rectangle;
+  move;
+  bezier;
+  close;
+  simplify;
 
   freeHandTool() {
     // start path drawing on mouse down
@@ -213,29 +221,114 @@ export class MainToolsSidebarComponent implements OnInit {
     }
     return null;
   }
+
+  closePolygon() {
+    var hitOptions = {
+      segments: true,
+      stroke: true,
+      fill: true,
+      tolerance: 5
+    };
+    // move cursor to detect polygon then close it on double click
+    this.tool.onMouseMove = (event) => {
+      event.preventDefault();
+      var hitResult = Paper.project.hitTest(event.point, hitOptions);
+      Paper.project.activeLayer.selected = false;
+      if (hitResult && hitResult.item) {
+        hitResult.item.selected = true;
+        // double click to close poygon
+        hitResult.item.onClick = (e) => {
+          e.target.closed = true;
+          e.target.selected = false;
+          this.pathB = null;
+        }
+      }
+    }
+    this.tool.onMouseDown = (event) => {
+      event.preventDefault();
+    }
+    this.tool.onMouseDrag = (event) => {
+      event.preventDefault();
+    }
+  }
+  simplifyPolygon() {
+    var hitOptions = {
+      segments: true,
+      stroke: true,
+      fill: true,
+      tolerance: 5
+    };
+    // move cursor to detect polygon then close it on double click
+    this.tool.onMouseMove = (event) => {
+      event.preventDefault();
+      var hitResult = Paper.project.hitTest(event.point, hitOptions);
+      Paper.project.activeLayer.selected = false;
+      if (hitResult && hitResult.item) {
+        hitResult.item.selected = true;
+        // double click to close poygon
+        hitResult.item.onClick = (e) => {
+          e.target.simplify();
+          e.target.flatten(4);
+        }
+      }
+    }
+    this.tool.onMouseDown = (event) => {
+      event.preventDefault();
+    }
+    this.tool.onMouseDrag = (event) => {
+      event.preventDefault();
+    }
+  }
   selectTool(tool) {
+    // remove active classes
+    this.resetActiveClasses();
     // tools selecting
     if (tool === 'freeHand') {
       this.freeHandTool();
+      this.freeHand = true;
     } else if (tool === 'circle') {
       this.circleTool();
+      this.circle = true;
     } else if (tool === 'rectangle') {
       this.rectangleTool();
+      this.rectangle = true;
     } else if (tool === 'move') {
       this.moveTool();
+      this.move = true;
     } else if (tool === 'bezier') {
       this.bezierTool();
+      this.bezier = true;
+    } else if (tool === 'close') {
+      this.closePolygon();
+      this.close = true;
+    } else if (tool === 'simplify') {
+      this.simplifyPolygon();
+      this.simplify = true;
     }
+  }
+  resetActiveClasses() {
+    this.freeHand = null;
+    this.circle = null;
+    this.rectangle = false;
+    this.move = null;
+    this.bezier = null;
+    this.close = null;
+    this.simplify = null;
   }
 
   clearScene() {
-    // remove all items from active layer
-    Paper.project.clear()
     // temp solution show buton for add/create iamge
     this.drawingArea.width = 500;
     this.drawingArea.height = 500;
+    // reset variables becaus tools relies on them
+    // maybe define inside functions
+    this.pathB = null;
+    this.myPath = null;
+    this.segment = null;
+    // remove all items from active layer
+    Paper.project.clear()
+    // emit clear event
     this.clearEvent.emit(false);
-
   }
 
   @Input() isSelected: boolean;
