@@ -14,7 +14,7 @@ export class MainToolsSidebarComponent implements OnInit {
   segment;
   path;
   pathB;
-  // tools calsses
+  // tools classes
   freeHand;
   circle;
   rectangle;
@@ -26,12 +26,14 @@ export class MainToolsSidebarComponent implements OnInit {
   freeHandTool() {
     // start path drawing on mouse down
     this.tool.onMouseDown = (event) => {
+      event.preventDefault();
       this.myPath = new Paper.Path();
       this.myPath.strokeColor = this.color;
       this.myPath.add(event.point);
     }
     // adding point to path while dragging
     this.tool.onMouseDrag = (event) => {
+      event.preventDefault();
       this.myPath.add(event.point);
     }
     // prevent move tool actions
@@ -268,7 +270,6 @@ export class MainToolsSidebarComponent implements OnInit {
         // double click to close poygon
         hitResult.item.onClick = (e) => {
           e.target.simplify();
-          e.target.flatten(4);
         }
       }
     }

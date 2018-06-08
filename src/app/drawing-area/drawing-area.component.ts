@@ -7,6 +7,7 @@ import * as Paper from 'paper';
 })
 export class DrawingAreaComponent implements OnInit {
   drawingArea;
+  exported;
 
   onFileChanged(event) {
     // emit event
@@ -36,6 +37,15 @@ export class DrawingAreaComponent implements OnInit {
       }
     }
     reader.readAsDataURL(event.target.files[0]);
+  }
+
+  exportJSON() {
+    this.exported = Paper.project.exportJSON();
+    console.log(this.exported)
+  }
+
+  importJSON() {
+    Paper.project.importJSON(this.exported);
   }
 
   @Input() isSelected: boolean;

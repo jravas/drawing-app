@@ -1,3 +1,14 @@
 <canvas width="500px" height="500px" id="drawingArea"></canvas>
-<input type="file" (change)="onFileChanged($event)">
 <!-- <div *ngIf="selected">bla</div> -->
+<div class="image-upload">
+    <label for="file-input">
+        <img src="../../assets/uplaod.svg" alt="Upload image"/>
+    </label>
+    <input id="file-input" type="file" (change)="onFileChanged($event)">
+</div>
+<div class="import" (click)="importJSON()">
+    <img src="../../assets/export.svg" alt="Export">
+</div>
+<div class="export" (click)="exportJSON()">
+    <img src="../../assets/export.svg" alt="Export">
+</div>
