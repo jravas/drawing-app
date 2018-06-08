@@ -24,28 +24,29 @@ export class MainToolsSidebarComponent implements OnInit {
   simplify;
 
   freeHandTool() {
+    // create freehand tool
+    this.freeHand = new Paper.Tool();
+    // activate freeHand tool
+    this.freeHand.activate();
     // start path drawing on mouse down
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
+    this.freeHand.onMouseDown = (event) => {
       this.myPath = new Paper.Path();
       this.myPath.strokeColor = this.color;
       this.myPath.add(event.point);
     }
     // adding point to path while dragging
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.freeHand.onMouseDrag = (event) => {
       this.myPath.add(event.point);
-    }
-    // prevent move tool actions
-    this.tool.onMouseMove = (event) => {
-      event.preventDefault();
     }
   }
 
   circleTool() {
+    // create circle tool
+    this.circle = new Paper.Tool();
+    // activate circle tool
+    this.circle.activate();
     // create circle from center (clicked point) of radius (released point)
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.circle.onMouseDrag = (event) => {
       var path = new Paper.Path.Circle({
         center: event.downPoint,
         radius: event.downPoint.getDistance(event.point),
@@ -56,32 +57,21 @@ export class MainToolsSidebarComponent implements OnInit {
       // Remove this path on the next drag event:
       path.removeOnDrag();
     }
-    // prevent move tool actions
-    this.tool.onMouseMove = (event) => {
-      event.preventDefault();
-    }
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
-    }
   }
 
   rectangleTool() {
+    // create rectangle tool
+    this.rectangle = new Paper.Tool();
+    // activate rectangle tool
+    this.rectangle.activate();
     // create rectangle from clicked point to released point
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.rectangle.onMouseDrag = (event) => {
       var rectangle = new Paper.Path.Rectangle(event.downPoint, event.point)
       rectangle.strokeColor = this.color;
       rectangle.fillColor = new Paper.Color(0, 0, 0, 0.0001);
       rectangle.data.type = 'rectangle';
       // Remove this path on the next drag event:
       rectangle.removeOnDrag();
-    }
-    // prevent move tool actions
-    this.tool.onMouseMove = (event) => {
-      event.preventDefault();
-    }
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
     }
   }
 
@@ -92,18 +82,19 @@ export class MainToolsSidebarComponent implements OnInit {
       fill: true,
       tolerance: 5
     };
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
+    // create move tool
+    this.move = new Paper.Tool();
+    // activate move tool
+    this.move.activate();
+    this.move.onMouseDown = (event) => {
       this.segment = this.path = null;
       var hitResult = Paper.project.hitTest(event.point, hitOptions);
-
       if (event.modifiers.shift) {
         if (hitResult.type == 'segment') {
           hitResult.segment.remove();
         };
         return;
       }
-
       if (hitResult) {
         this.path = hitResult.item;
         if (hitResult.type == 'segment') {
@@ -116,7 +107,7 @@ export class MainToolsSidebarComponent implements OnInit {
         hitResult.item.bringToFront();
       }
     }
-    this.tool.onMouseMove = (event) => {
+    this.move.onMouseMove = (event) => {
       event.preventDefault();
       var hitResult = Paper.project.hitTest(event.point, hitOptions);
       Paper.project.activeLayer.selected = false;
@@ -124,7 +115,7 @@ export class MainToolsSidebarComponent implements OnInit {
         hitResult.item.selected = true;
       }
     }
-    this.tool.onMouseDrag = (event) => {
+    this.move.onMouseDrag = (event) => {
       event.preventDefault();
       if (this.segment) {
         // if item type is circle change circle radius
@@ -153,8 +144,11 @@ export class MainToolsSidebarComponent implements OnInit {
 
   bezierTool() {
     var currentSegment, mode, type;
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
+    // create bezier tool
+    this.bezier = new Paper.Tool();
+    // activate bezier tool
+    this.bezier.activate();
+    this.bezier.onMouseDown = (event) => {
       if (currentSegment) {
         currentSegment.selected = false;
         mode = type = currentSegment = null;
@@ -188,8 +182,7 @@ export class MainToolsSidebarComponent implements OnInit {
         currentSegment.selected = true;
       }
     }
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.bezier.onMouseDrag = (event) => {
       if (mode == 'move' && type == 'point') {
         currentSegment.point = event.point;
       } else if (mode != 'close') {
@@ -231,26 +224,26 @@ export class MainToolsSidebarComponent implements OnInit {
       fill: true,
       tolerance: 5
     };
+    // create close tool
+    this.close = new Paper.Tool();
+    // activate close tool
+    this.close.activate();
     // move cursor to detect polygon then close it on double click
-    this.tool.onMouseMove = (event) => {
-      event.preventDefault();
+    this.close.onMouseMove = (event) => {
       var hitResult = Paper.project.hitTest(event.point, hitOptions);
       Paper.project.activeLayer.selected = false;
       if (hitResult && hitResult.item) {
         hitResult.item.selected = true;
-        // double click to close poygon
-        hitResult.item.onClick = (e) => {
-          e.target.closed = true;
-          e.target.selected = false;
-          this.pathB = null;
-        }
       }
     }
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
-    }
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.close.onMouseDown = (event) => {
+      var hitResult = Paper.project.hitTest(event.point, hitOptions);
+      Paper.project.activeLayer.selected = false;
+      if (hitResult && hitResult.item) {
+        hitResult.item.closed = true;
+        hitResult.item.selected = false;
+        this.pathB = null;
+      }
     }
   }
   simplifyPolygon() {
@@ -260,24 +253,24 @@ export class MainToolsSidebarComponent implements OnInit {
       fill: true,
       tolerance: 5
     };
-    // move cursor to detect polygon then close it on double click
-    this.tool.onMouseMove = (event) => {
-      event.preventDefault();
+    // create simplify tool
+    this.simplify = new Paper.Tool();
+    // activate simplify tool
+    this.simplify.activate();
+    // move cursor to detect polygon then simplify it on click
+    this.simplify.onMouseMove = (event) => {
       var hitResult = Paper.project.hitTest(event.point, hitOptions);
       Paper.project.activeLayer.selected = false;
       if (hitResult && hitResult.item) {
         hitResult.item.selected = true;
-        // double click to close poygon
-        hitResult.item.onClick = (e) => {
-          e.target.simplify();
-        }
       }
     }
-    this.tool.onMouseDown = (event) => {
-      event.preventDefault();
-    }
-    this.tool.onMouseDrag = (event) => {
-      event.preventDefault();
+    this.simplify.onMouseDown = (event) => {
+      var hitResult = Paper.project.hitTest(event.point, hitOptions);
+      Paper.project.activeLayer.selected = false;
+      if (hitResult && hitResult.item) {
+        hitResult.item.simplify();
+      }
     }
   }
   selectTool(tool) {
@@ -286,25 +279,18 @@ export class MainToolsSidebarComponent implements OnInit {
     // tools selecting
     if (tool === 'freeHand') {
       this.freeHandTool();
-      this.freeHand = true;
     } else if (tool === 'circle') {
       this.circleTool();
-      this.circle = true;
     } else if (tool === 'rectangle') {
       this.rectangleTool();
-      this.rectangle = true;
     } else if (tool === 'move') {
       this.moveTool();
-      this.move = true;
     } else if (tool === 'bezier') {
       this.bezierTool();
-      this.bezier = true;
     } else if (tool === 'close') {
       this.closePolygon();
-      this.close = true;
     } else if (tool === 'simplify') {
       this.simplifyPolygon();
-      this.simplify = true;
     }
   }
   resetActiveClasses() {
