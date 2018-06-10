@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { StoreService } from '../store.service';
 import * as Paper from 'paper';
 
 @Component({
@@ -8,6 +9,10 @@ import * as Paper from 'paper';
 export class DrawingAreaComponent implements OnInit {
   drawingArea;
   exported;
+  data;
+
+  constructor(private storeService:StoreService) {
+  }
 
   onFileChanged(event) {
     // emit event
@@ -21,14 +26,7 @@ export class DrawingAreaComponent implements OnInit {
       let image = new Image();
       image.src = reader.result;
       image.onload = function() {
-        // width & height of main element
-        // let width = document.getElementById('canvas-container').offsetWidth;
-        // let height = document.getElementById('canvas-container').offsetHeight;
-        // // check if image is larger than image container -> screen
-        // if (image.height > height -20) {
-        //   console.log('image is too big do something about that 😸')
-        // }
-        // set canvas width and height equalt to iamge width and height
+        // set canvas width and height equalt to image width and height
         that.drawingArea.width = image.width;
         that.drawingArea.height = image.height;
         // check if image is larger than screen size
@@ -42,10 +40,13 @@ export class DrawingAreaComponent implements OnInit {
   exportJSON() {
     this.exported = Paper.project.exportJSON();
     console.log(this.exported)
+    this.storeService.postJSONService(this.exported).subscribe();
   }
 
   importJSON() {
-    Paper.project.importJSON(this.exported);
+    this.storeService.getJSONService().subscribe(data => {
+      Paper.project.importJSON(data)
+    });
   }
 
   @Input() isSelected: boolean;

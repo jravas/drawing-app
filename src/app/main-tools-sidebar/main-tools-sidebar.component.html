@@ -26,13 +26,16 @@
   </li>
   <li (click)="selectTool('close')" [class.active]="close">
     <a href="#">
-      close
+      <img src="../../assets/close-path_p.png" alt="Close path">
     </a>
   </li>
   <li (click)="selectTool('simplify')" [class.active]="simplify">
     <a href="#">
-      simplify
+      <img src="../../assets/simplify-path.svg" alt="Simplify path">
     </a>
+  </li>
+  <li class="color-picker-class">
+    <input [(colorPicker)]="color" [style.background]="color"/>
   </li>
   <li (click)="clearScene()">
     <a href="#">

@@ -1,5 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import * as Paper from 'paper';
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-main-tools-sidebar',
@@ -7,13 +8,12 @@ import * as Paper from 'paper';
 })
 export class MainToolsSidebarComponent implements OnInit {
   drawingArea;
-  tool = new Paper.Tool();
   color = '#000';
-  types = ['point', 'handleIn', 'handleOut'];
   myPath;
   segment;
   path;
   pathB;
+  selected;
   // tools classes
   freeHand;
   circle;
@@ -102,13 +102,12 @@ export class MainToolsSidebarComponent implements OnInit {
         } else if (hitResult.type == 'stroke') {
           var location = hitResult.location;
           this.segment = this.path.insert(location.index + 1, event.point);
-          this.path.smooth();
         }
         hitResult.item.bringToFront();
+        this.selected = hitResult.item;
       }
     }
     this.move.onMouseMove = (event) => {
-      event.preventDefault();
       var hitResult = Paper.project.hitTest(event.point, hitOptions);
       Paper.project.activeLayer.selected = false;
       if (hitResult && hitResult.item) {
@@ -116,7 +115,6 @@ export class MainToolsSidebarComponent implements OnInit {
       }
     }
     this.move.onMouseDrag = (event) => {
-      event.preventDefault();
       if (this.segment) {
         // if item type is circle change circle radius
         if (this.path.data.type === 'circle') {
@@ -129,11 +127,9 @@ export class MainToolsSidebarComponent implements OnInit {
           let c = event.point.getDistance(this.path.bounds.center) * 2;
           // scale rectangle
           this.path.scale(c / (Math.sqrt((Math.pow(a,2) + Math.pow(b,2)))))
-          // console.log(event.point.getDistance(this.path.bounds.center))
         } else {
           this.segment.point.x += event.delta.x;
           this.segment.point.y += event.delta.y;
-          this.path.smooth();
         }
       } else if (this.path) {
           this.path.position.x += event.delta.x;
@@ -143,6 +139,12 @@ export class MainToolsSidebarComponent implements OnInit {
   }
 
   bezierTool() {
+    var hitOptions = {
+      segments: true,
+      stroke: true,
+      fill: true,
+      tolerance: 5
+    };
     var currentSegment, mode, type;
     // create bezier tool
     this.bezier = new Paper.Tool();
@@ -155,6 +157,8 @@ export class MainToolsSidebarComponent implements OnInit {
       }
       if (!this.pathB) {
         this.pathB = new Paper.Path();
+        this.pathB.strokeColor = this.color;
+        this.pathB.data.type = 'bezier';;
         this.pathB.fillColor = {
           hue: 360 * Math.random(),
           saturation: 1,
@@ -181,6 +185,7 @@ export class MainToolsSidebarComponent implements OnInit {
         }
         currentSegment.selected = true;
       }
+
     }
     this.bezier.onMouseDrag = (event) => {
       if (mode == 'move' && type == 'point') {
@@ -196,13 +201,30 @@ export class MainToolsSidebarComponent implements OnInit {
         currentSegment.handleOut.y -= delta.y;
       }
     }
+    // this.bezier.onMouseUp = (event) => {
+    //   var hitResultItem = Paper.project.hitTest(event.point, hitOptions);
+    //   var hitResult = Paper.project.hitTestAll(event.point, hitOptions);
+    //     // http://paperjs.org/reference/path/#subtract-path
+    //     // Paper.project.layers[0].children.forEach(el => {
+    //     //   if (el.data.type === 'bezier' && el != hitResult.item) {
+    //     //     el.exclude(hitResult.item)
+    //     //     // el.getIntersections(hitResult.item).forEach(element => {
+    //     //     //   console.log(element.path)
+    //     //     // });
+    //     //   }
+    //     // });
+    //   }
+    
+    // }
   }
 
   findHandle(point) {
+    // path types
+    let types = ['point', 'handleIn', 'handleOut'];
     // bezier drawing handle
     for (var i = 0, l = this.pathB.segments.length; i < l; i++) {
       for (var j = 0; j < 3; j++) {
-        var type = this.types[j];
+        var type = types[j];
         var segment = this.pathB.segments[i];
         var segmentPoint = type == 'point' ? segment.point : segment.point + segment[type];
         var distance = point.getDistance(segmentPoint);
@@ -304,7 +326,6 @@ export class MainToolsSidebarComponent implements OnInit {
   }
 
   clearScene() {
-    // temp solution show buton for add/create iamge
     this.drawingArea.width = 500;
     this.drawingArea.height = 500;
     // reset variables becaus tools relies on them
@@ -316,6 +337,13 @@ export class MainToolsSidebarComponent implements OnInit {
     Paper.project.clear()
     // emit clear event
     this.clearEvent.emit(false);
+  }
+
+  @HostListener('document:keydown', ['$event']) deleteEvent(e) {
+    // delete seleted item on backspace and delete button
+    if(e.keyCode === 46 || e.keyCode === 8) {
+      this.selected.remove();
+    }
   }
 
   @Input() isSelected: boolean;
