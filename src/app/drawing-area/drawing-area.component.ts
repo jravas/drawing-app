@@ -38,12 +38,13 @@ export class DrawingAreaComponent implements OnInit {
   }
 
   exportJSON() {
+    // start project exporting service
     this.exported = Paper.project.exportJSON();
-    console.log(this.exported)
     this.storeService.postJSONService(this.exported).subscribe();
   }
 
   importJSON() {
+    // start project importing service
     this.storeService.getJSONService().subscribe(data => {
       Paper.project.importJSON(data)
     });

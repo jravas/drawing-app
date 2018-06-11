@@ -8,7 +8,7 @@ export class AppComponent {
   imageSelected = false;
 
   selectedFunction($event) {
-    console.log($event)
+    // console.log($event)
   }
 
   ngOnInit() {
